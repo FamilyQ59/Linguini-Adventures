@@ -1,37 +1,49 @@
 from Collisions import check_collision
 import Colors
-import pygame
 import math
 import random
-from Load import import_images
+from Load import *
 from Main import player
 
-Phantom_Folder = "C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Phantom_Folder"
-Phantom_Animation = []
-Phant_Projectile = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Phant_Projectile'
-Phantom_Projectile = []
-Shooter_Head_Folder = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Shooter_Head'
-Shooter_Head = []
-scale = pygame.transform.scale
-Phantom_hit = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Phantom_hit.png'
-Shooter_Head_Hit = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Shooter_Head_Hit.png'
-ninja_attack_folder = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Ninja_Melee'
-ninja_attack_images = []
-ninja_run = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Ninja_Run'
-ninja_run_img = []
-ninja_get_hit = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Ninja_Run_Hit.png'
-vulture_flight = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Vulture_Flight'
-vulture_flight_img = []
-vulture_dive = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Vulture_dive'
-vulture_dive_img = []
+Phantom_Animation = [pygame.image.load(os.path.join("../Images/Phantom1.png")),
+                     pygame.image.load(os.path.join("../Images/Phantom2.png")),
+                     pygame.image.load(os.path.join("../Images/Phantom3.png")),
+                     pygame.image.load(os.path.join("../Images/Phantom4.png"))]
 
-import_images(Phantom_Folder, Phantom_Animation)
-import_images(Phant_Projectile, Phantom_Projectile)
-import_images(Shooter_Head_Folder, Shooter_Head)
-import_images(ninja_attack_folder, ninja_attack_images)
-import_images(vulture_flight, vulture_flight_img)
-import_images(vulture_dive, vulture_dive_img)
-import_images(ninja_run, ninja_run_img)
+Phantom_Projectile = [pygame.image.load(os.path.join("../Images/Phant_projectile1.png")),
+                      pygame.image.load(os.path.join("../Images/Phant_projectile2.png")),
+                      pygame.image.load(os.path.join("../Images/Phant_projectile3.png"))]
+
+Shooter_Head = [pygame.image.load(os.path.join("../Images/Shooter_1.png")),
+                pygame.image.load(os.path.join("../Images/Shooter_2.png"))]
+
+scale = pygame.transform.scale
+
+Phantom_hit = os.path.join("../Images/Phantom_hit.png")
+
+Shooter_Head_Hit = os.path.join("../Images/Shooter_Head_Hit.png")
+
+ninja_attack_images = [pygame.image.load(os.path.join("../Images/Ninja_attack1.png")),
+                       pygame.image.load(os.path.join("../Images/Ninja_attack2.png")),
+                       pygame.image.load(os.path.join("../Images/Ninja_attack3.png")),
+                       pygame.image.load(os.path.join("../Images/Ninja_attack4.png")),
+                       pygame.image.load(os.path.join("../Images/Ninja_attack5.png"))]
+
+ninja_run = os.path.join("..", "Images", "Assets", 'Ninja_Run')
+ninja_run_img = [pygame.image.load(os.path.join("../Images/Ninja_Run_1.png")),
+                 pygame.image.load(os.path.join("../Images/Ninja_Run_2.png")),
+                 pygame.image.load(os.path.join("../Images/Ninja_Run_3.png"))]
+
+ninja_get_hit = os.path.join("../Images/Ninja_Run_Hit.png")
+
+vulture_flight_img = [pygame.image.load(os.path.join("../Images/Vulture_1.png")),
+                  pygame.image.load(os.path.join("../Images/Vulture_2.png")),
+                  pygame.image.load(os.path.join("../Images/Vulture_3.png"))]
+
+vulture_dive_img = [pygame.image.load(os.path.join("../Images/Vulture_dive_1.png")),
+                    pygame.image.load(os.path.join("../Images/Vulture_dive_2.png")),
+                    pygame.image.load(os.path.join("../Images/Vulture_dive_3.png"))]
+spike_img = os.path.join("../Images/Spike.png")
 
 
 class Phantom:
@@ -59,7 +71,7 @@ class Phantom:
         if self.life > 0:  # if it´s alive
 
             # Draw Orbit
-            pygame.draw.circle(surface, (255, 255, 255),
+            pygame.draw.circle(surface, (20, 0, 0),
                                (self.orbit_center.x - scroll_x, self.orbit_center.y - scroll_y),
                                45, 2)
             # Hitbox
@@ -101,17 +113,20 @@ class Phantom:
             for shot in self.projectiles:  # Call movement and check projectile collisions
                 self.shot_timer += 1
                 shot.movement(character_position_x, character_position_y)
-                if self.shot_timer == 300 and len(self.projectiles) > 0:
-                    self.projectiles.remove(self.projectiles[0])
-                    self.shot_timer = 0
+                try:
+                    if self.shot_timer == 300 and len(self.projectiles) > 0:
+                        self.projectiles.remove(self.projectiles[0])
+                        self.shot_timer = 0
 
-                if check_collision(character_hitbox, shot.hitbox) and len(self.projectiles) > 0:
-                    player.life -= 1
-                    self.projectiles.remove(shot)
-
-                for rect in Tile_rects:  # Check collisions with all tiles
-                    if check_collision(rect, shot.hitbox) and len(self.projectiles) > 0:
+                    if check_collision(character_hitbox, shot.hitbox) and len(self.projectiles) > 0:
+                        player.life -= 1
                         self.projectiles.remove(shot)
+
+                    for rect in Tile_rects:  # Check collisions with all tiles
+                        if check_collision(rect, shot.hitbox) and len(self.projectiles) > 0:
+                            self.projectiles.remove(shot)
+                except ValueError:
+                    print("a")
 
     def collision(self, player_attack):
         # Check collisions between phantom and player directly
@@ -128,9 +143,12 @@ class Phantom:
                 player.life -= 0.1
 
             # Collision with shot and player attack
-            for shot in self.projectiles:
-                if check_collision(player.range, shot.hitbox) and player.attacking and len(self.projectiles) > 0:
-                    self.projectiles.remove(shot)
+            try:
+                for shot in self.projectiles:
+                    if check_collision(player.range, shot.hitbox) and player.attacking and len(self.projectiles) > 0:
+                        self.projectiles.remove(shot)
+            except ValueError:
+                print("a")
 
 
 class Phantom_projectile:
@@ -166,17 +184,17 @@ class Phantom_projectile:
 
 class Soldier:
     # Enemy that shots when enemy is at a certain distance, shoots normal bullets
-    def __init__(self, position):
+    def __init__(self, position, face_side):
         # Basic variables
         self.position = pygame.math.Vector2(position)
         self.hitbox = (self.position.x, self.position.y, 20, 40)
         self.life = 3
         self.color = Colors.Green
-        self.range = 200
+        self.range = 400
 
         # Define movement variables and initial direction
         self.move_definition = {"Left": False, "Right": False, "Move_length": 0}
-        if random.choice(["Left", "Right"]) == "Left":
+        if face_side == "Left":
             self.move_definition["Left"] = True
         else:
             self.move_definition["Right"] = True
@@ -252,25 +270,26 @@ class Soldier:
             for shot in self.projectiles:
                 shot.draw(surface, scroll_X, scroll_Y)
 
-    def movement(self, Range_px, Speed, Tile_rects):
+    def movement(self, Range_px, Speed, Tile_rects, move=bool):
         # As long as player isn´t in visual range of soldier, move a determined range to the left, and then to right
-        if self.distance > self.range and self.life > 0:
-            if self.move_definition["Left"]:
-                self.position.x -= Speed
-                self.move_definition["Move_length"] += Speed
-            if self.move_definition["Right"]:
-                self.position.x += Speed
-                self.move_definition["Move_length"] += Speed
+        if move is True:
+            if self.distance > self.range and self.life > 0:
+                if self.move_definition["Left"]:
+                    self.position.x -= Speed
+                    self.move_definition["Move_length"] += Speed
+                if self.move_definition["Right"]:
+                    self.position.x += Speed
+                    self.move_definition["Move_length"] += Speed
 
-            if self.move_definition["Move_length"] >= Range_px and self.move_definition["Left"]:
-                self.move_definition["Left"] = False
-                self.move_definition["Right"] = True
-                self.move_definition["Move_length"] = 0
+                if self.move_definition["Move_length"] >= Range_px and self.move_definition["Left"]:
+                    self.move_definition["Left"] = False
+                    self.move_definition["Right"] = True
+                    self.move_definition["Move_length"] = 0
 
-            if self.move_definition["Move_length"] >= Range_px and self.move_definition["Right"]:
-                self.move_definition["Right"] = False
-                self.move_definition["Left"] = True
-                self.move_definition["Move_length"] = 0
+                if self.move_definition["Move_length"] >= Range_px and self.move_definition["Right"]:
+                    self.move_definition["Right"] = False
+                    self.move_definition["Left"] = True
+                    self.move_definition["Move_length"] = 0
 
         # Call to loop
         self.shoot(Tile_rects)
@@ -286,7 +305,7 @@ class Soldier:
             # Check collisions between phantom and player directly
             if check_collision(player.range, self.hitbox) and self.hit == 0:  # Attack and enemy
                 self.color = Colors.Red
-                self.life -= 1
+                self.life -= 2
                 self.hit = 1
             if player.attacking is False:
                 self.hit = 0
@@ -312,16 +331,19 @@ class Soldier:
             for shot in self.projectiles:
                 shot.movement()
 
-                if check_collision(player.rect, shot.hitbox) and len(self.projectiles) > 0:
-                    player.life -= 1
-                    self.projectiles.remove(shot)
-
-                if check_collision(player.range, shot.hitbox) and player.attacking and len(self.projectiles) > 0:
-                    self.projectiles.remove(shot)
-
-                for rect in Tile_rects:
-                    if check_collision(rect, shot.hitbox) and len(self.projectiles) > 0:
+                try:
+                    if check_collision(player.rect, shot.hitbox) and len(self.projectiles) > 0:
+                        player.life -= 1
                         self.projectiles.remove(shot)
+
+                    if check_collision(player.range, shot.hitbox) and player.attacking and len(self.projectiles) > 0:
+                        self.projectiles.remove(shot)
+
+                    for rect in Tile_rects:
+                        if check_collision(rect, shot.hitbox) and len(self.projectiles) > 0:
+                            self.projectiles.remove(shot)
+                except ValueError:
+                    print("a")
 
 
 class Soldier_projectile:
@@ -351,7 +373,7 @@ class Soldier_projectile:
 
 
 class Ninja:
-    def __init__(self, position, DistanceToEachSide):
+    def __init__(self, position, DistanceToEachSide, life):
         self.position = pygame.math.Vector2(position)
         self.move_definition = {"Left": True, "Right": False, "Move_length": 0}
         self.limits = [self.position.x - DistanceToEachSide, self.position.x + DistanceToEachSide]
@@ -359,7 +381,7 @@ class Ninja:
         self.life = 3
         self.color = Colors.Green
         self.animation_index = {"attack": 0, "walk": 0}
-        self.life = 3
+        self.life = life
 
         # Attack
         self.distance = 0
@@ -379,7 +401,7 @@ class Ninja:
             if self.move_definition["Left"]:
                 surface.blit(scale(ninja_run_img[int(self.animation_index["walk"])], (30, 60)),
                              (self.hitbox.x - scroll_x, self.hitbox.y - scroll_y, self.hitbox.width,
-                                 self.hitbox.height))
+                              self.hitbox.height))
                 # 0.5 in order to iterate every 2 loops, that's why when drawing it,it iterates through it as an int
                 self.animation_index["walk"] += 0.5
 
@@ -391,16 +413,12 @@ class Ninja:
                 surface.blit(scale(pygame.transform.flip((ninja_run_img[int(self.animation_index["walk"])]),
                                                          True, False), (30, 60)),
                              (self.hitbox.x - scroll_x, self.hitbox.y - scroll_y, self.hitbox.width,
-                                 self.hitbox.height))
+                              self.hitbox.height))
                 # 0.5 in order to iterate every 2 loops, that's why when drawing it,it iterates through it as an int
                 self.animation_index["walk"] += 0.5
 
             if self.animation_index["walk"] >= 3:
                 self.animation_index["walk"] = 0
-
-            if self.attacking:
-                pygame.draw.rect(surface, (255, 255, 255), (self.range.x - scroll_x, self.range.y - scroll_y,
-                                                            self.range.width, self.range.height), 1)
 
             # Draw Attack
             if self.attacking:
@@ -435,7 +453,7 @@ class Ninja:
                              (self.hitbox.x - scroll_x, self.hitbox.y - scroll_y, self.hitbox.width,
                               self.hitbox.height))
 
-    def Interactions(self, Speed, Range_px):
+    def Interactions(self, Speed):
 
         if self.life > 0:
 
@@ -540,7 +558,10 @@ class Vulture:
         self.position = pygame.math.Vector2(pos)
         self.DistanceToEachSide = DistanceToEachSide
         self.limits = [self.position.x - DistanceToEachSide, self.position.x + DistanceToEachSide]
-        self.movement_definition = {"Left": False, "Right": True}
+        if random.choice([True, False]):
+            self.movement_definition = {"Left": False, "Right": True}
+        else:
+            self.movement_definition = {"Left": True, "Right": False}
 
         # Hitbox
         self.hitbox = pygame.Rect(self.position.x, self.position.y, 40, 20)
@@ -548,16 +569,16 @@ class Vulture:
         # Attack
         self.attacking = False
         self.distance = math.sqrt(
-            (self.position.x - player.position.x) ** 2 + (self.position.x - player.position.x) ** 2)
+            (self.position.x - player.position.x) ** 2 + (self.position.y - player.position.y) ** 2)
         self.attack_limit = [0, 0]
         self.WhenToAttack = {"Left": 0, "Right": 0, "Top": 0}
 
         # Defines the probability of the diving motion beginning
-        self.begin_attack = {"Target": random.randint(5, 10), "Chance": 0}
-        self.speed = 7
-        self.grabbing = False
+        self.begin_attack = {"Target": random.randint(1, 3), "Chance": 0}
+        self.speed = 10
         self.animation_index = {"Flight": 0}
         self.dive = {"player.x": 0, "player.y": 0, "self_pos": pygame.math.Vector2(), "once": False}
+        self.distance_to_each_side = DistanceToEachSide
 
     def draw(self, surface, scroll_x, scroll_y):
         if self.life > 0:
@@ -601,13 +622,14 @@ class Vulture:
                 if self.animation_index["Flight"] >= 3:
                     self.animation_index["Flight"] = 0
 
-    def Interactions(self, DistanceToEachSide, Tile_rects):
+    def Interactions(self, Tile_rects, limit_x_1, limit_x_2, player_y_limit):
         if self.life > 0:
             self.attack_limit = [0, 0]  # This variable checks when the vulture hits the limit and changes side,
             # it´s used when defining the chance of the attack beginning
 
-            if 400 < player.rect.x < 800:  # Keeps vulture within limits
-                self.limits = [player.rect.x - DistanceToEachSide, player.rect.x + DistanceToEachSide]
+            if limit_x_1 < player.rect.x < limit_x_2 and player.position.y >= player_y_limit:
+                # Keeps vulture within limits
+                self.limits = [player.rect.x - self.distance_to_each_side, player.rect.x + self.distance_to_each_side]
 
             if self.begin_attack["Chance"] < self.begin_attack["Target"]:  # Define movement while vulture flies:
                 if self.movement_definition["Left"] and self.position.x > self.limits[0]:
@@ -625,12 +647,13 @@ class Vulture:
                     self.movement_definition["Left"] = True
                     self.movement_definition["Right"] = False
 
-            # Defines vulture movement while it dives
-            if self.begin_attack["Chance"] >= self.begin_attack["Target"]:
+            # Begins Dive
+            if self.begin_attack["Chance"] >= self.begin_attack["Target"] and player.position.y == player_y_limit:
+
+                self.attacking = True
 
                 # Define direction only once
                 if self.dive["once"] is False:
-                    print("a")
                     self.dive["player.x"] = player.position.x
                     self.dive["player.y"] = player.position.y
                     self.dive["self_pos"] = self.position
@@ -642,11 +665,14 @@ class Vulture:
                     (self.dive["self_pos"].y - self.dive["player.y"]) ** 2)
 
                 # Diving movement
-                self.attacking = True
+            if self.attacking is True:
                 self.position.x += self.speed * (self.dive["player.x"] -
                                                  self.dive["self_pos"].x) / self.distance
                 self.position.y += self.speed * (self.dive["player.y"] -
                                                  self.dive["self_pos"].y) / self.distance
+
+            elif player.position.y != player_y_limit:
+                self.begin_attack["Chance"] = 0
 
             self.attack()
             self.collisions(Tile_rects)
@@ -671,3 +697,33 @@ class Vulture:
         for rect in Tile_rects:
             if check_collision(rect, self.hitbox):
                 self.life -= 3
+
+
+class Spike:
+    def __init__(self, pos):
+        self.position = pygame.math.Vector2(pos)
+        self.hitbox = pygame.Rect(self.position.x + 6, self.position.y, 20, 32)
+
+    def draw(self, surface, scroll_x, scroll_y):
+        surface.blit(pygame.image.load(spike_img), (self.hitbox.x - 6 - scroll_x, self.hitbox.y - scroll_y,
+                                                    self.hitbox.w, self.hitbox.h))
+
+        self.collisions()
+
+    def collisions(self):
+        if check_collision(player.rect, self.hitbox):
+            player.life -= 100
+
+
+class Level_doors:
+    def __init__(self, position, DoorNumber=int):
+        self.position = pygame.math.Vector2(position)
+        self.hitbox = pygame.Rect(self.position.x, self.position.y, 32, 64)
+        self.door_number = DoorNumber
+
+    def draw(self, surface, scroll_x, scroll_y):
+        surface.blit(SelectLvl.Level_doors[self.door_number], (self.position.x - scroll_x, self.position.y - scroll_y))
+
+    def Collisions(self):
+        if check_collision(player.rect, self.hitbox):
+            return True

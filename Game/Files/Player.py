@@ -1,15 +1,18 @@
 import pygame
-from Load import import_images
+import os
 
-linguini = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Linguini.png'
-Linguini_Folder = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Linguini_Folder'
-attack_folder = 'C:/Users/carlo/PycharmProjects/Linguini-Adventures/Game/Images/Assets/Attack_Images'
-attack_images = []
-walk_images = []
+linguini = os.path.join("../Images/Linguini.png")
+attack_images = [pygame.image.load("../Images/Attack_1.png"),
+                 pygame.image.load(os.path.join("../Images/Attack_2.png")),
+                 pygame.image.load(os.path.join("../Images/Attack_3.png")),
+                 pygame.image.load(os.path.join("../Images/Attack_4.png")),
+                 pygame.image.load(os.path.join("../Images/Attack_5.png"))]
+
+walk_images = [pygame.image.load(os.path.join("../Images/Linguini_1.png")),
+               pygame.image.load(os.path.join("../Images/Linguini_2.png")),
+               pygame.image.load(os.path.join("../Images/Linguini_3.png")),
+               pygame.image.load(os.path.join("../Images/Linguini_4.png"))]
 scale = pygame.transform.scale
-
-import_images(attack_folder, attack_images)
-import_images(Linguini_Folder, walk_images)
 
 
 class Player(pygame.sprite.Sprite):
@@ -23,8 +26,8 @@ class Player(pygame.sprite.Sprite):
         # Movement Variables
         self.moving = False
         self.is_jumping, self.on_ground = False, False
-        self.gravity, self.friction = .60, -.12
-        self.position, self.velocity = pygame.math.Vector2(480, 320), pygame.math.Vector2(0, 0)
+        self.gravity, self.friction = .60, -0.25 # 25
+        self.position, self.velocity = pygame.math.Vector2(0, 0), pygame.math.Vector2(0, 0)
         self.acceleration = pygame.math.Vector2(0, self.gravity)
 
         # Draw Variables
@@ -37,10 +40,11 @@ class Player(pygame.sprite.Sprite):
         self.attack_cd_begin = False
         self.right, self.left = False, False
         self.range = pygame.Rect(self.position.x, self.position.y, 100, 50)
-        self.attack_begin_side = [0, 0]
+        self.attack_begin_side = [0, 0, 0]
         self.life = 5
 
     def draw(self, display, scroll_x, scroll_y):
+
         # Draw Character
         if self.moving is False:
             display.blit(self.image, (self.rect.x - scroll_x, self.rect.y - scroll_y))
@@ -56,7 +60,7 @@ class Player(pygame.sprite.Sprite):
         if self.attacking:
 
             # Draw Attack to the Right
-            if self.attack_begin_side == [1, 0]:
+            if self.attack_begin_side == [1, 0, 0]:
                 # Draws attack (scales it, iterates through it (as an int), defines position and size)
                 display.blit(scale(attack_images[int(self.animation_index["attack"])], (75, 50)),
                              (self.range.x - scroll_x, self.range.y - scroll_y, self.range.width, self.range.height))
@@ -64,10 +68,17 @@ class Player(pygame.sprite.Sprite):
                 self.animation_index["attack"] += 1
 
             # Draws Attack to the Left
-            elif self.attack_begin_side == [0, 1]:
+            if self.attack_begin_side == [0, 1, 0]:
                 # Draws attack(flips it, scales it, iterates through it (as an int), defines position and size)
                 display.blit(pygame.transform.flip(scale(attack_images[int(self.animation_index["attack"])],
                                                          (75, 50)), True, False),
+                             (self.range.x - scroll_x, self.range.y - scroll_y, self.range.width, self.range.height))
+                self.animation_index["attack"] += 1
+
+            elif self.attack_begin_side == [0, 0, 1]:
+                # Draws attack(rotates it, scales it, iterates through it (as an int), defines position and size)
+                display.blit(pygame.transform.rotate(scale(attack_images[int(self.animation_index["attack"])],
+                                                           (75, 50)), 90),
                              (self.range.x - scroll_x, self.range.y - scroll_y, self.range.width, self.range.height))
                 self.animation_index["attack"] += 1
 
@@ -177,25 +188,30 @@ class Player(pygame.sprite.Sprite):
             self.atktime += 1
 
         # Defines the attack hitbox depending on if player facing right or left (respectively)
-        if self.attack_begin_side == [1, 0]:
+        if self.attack_begin_side == [1, 0, 0]:
             self.range = pygame.Rect(self.rect.x + self.rect.width, self.rect.y - 15, 75, 50)
-        if self.attack_begin_side == [0, 1]:
+        if self.attack_begin_side == [0, 1, 0]:
             self.range = pygame.Rect(self.rect.x - 75, self.rect.y - 15, 75, 50)
+        if self.attack_begin_side == [0, 0, 1]:
+            self.range = pygame.Rect(self.rect.x - 13, self.rect.y - 60 - 15, 50, 75)
 
         # Resets array checking which side is player facing
-        if self.attack_begin_side == [0, 0]:
+        if self.attack_begin_side == [0, 0, 0]:
             self.range = pygame.Rect(1000, 1000, 1, 1)
 
         # Takes attack input and checks if every cooldown is done
-        if key[pygame.K_o] and self.attacking is False and not self.attack_cd_begin:
-            if self.right:
-                self.attack_begin_side = [1, 0]
-            if self.left:
-                self.attack_begin_side = [0, 1]
+        if (key[pygame.K_o] and self.attacking is False and not self.attack_cd_begin or pygame.mouse.get_pressed()[0]
+                and self.attacking is False and not self.attack_cd_begin):
+            if key[pygame.K_w]:
+                self.attack_begin_side = [0, 0, 1]
+            if self.right and not key[pygame.K_w]:
+                self.attack_begin_side = [1, 0, 0]
+            if self.left and not key[pygame.K_w]:
+                self.attack_begin_side = [0, 1, 0]
             self.attack_cd_begin = True
             self.attacking = True
         elif self.atktime == 5:
-            self.attack_begin_side = [0, 0]
+            self.attack_begin_side = [0, 0, 0]
             self.attacking = False
             self.atktime = 0
             self.animation_index["attack"] = 0
